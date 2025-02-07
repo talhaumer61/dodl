@@ -1,0 +1,396 @@
+{
+	"info": {
+		"_postman_id": "c90c2f4a-4fa6-473e-8987-9a35c101539f",
+		"name": "UAT upop",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "3.1 AccessToken",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "merchant_id",
+							"value": "102",
+							"type": "text"
+						},
+						{
+							"key": "secured_key",
+							"value": "zWHjBp2AlttNu1sK",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}token",
+					"host": [
+						"{{URL}}token"
+					]
+				},
+				"description": "Token Request"
+			},
+			"response": []
+		},
+		{
+			"name": "3.2 Refresh Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.environment.get(\"refresh_token\");",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"token\",  jsonData.token);",
+							"pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": false
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"type": "text"
+						},
+						{
+							"key": "refresh_token",
+							"value": "{{refresh_token}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}refreshtoken",
+					"host": [
+						"{{URL}}refreshtoken"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4 Customer Validation (Without Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.environment.get(\"basket_id\");",
+							"pm.environment.get(\"txnamt\");",
+							"pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.10\",  jsonData.transaction_id);",
+							"pm.environment.set(\"3ds_secureid_3.10\",  jsonData.data_3ds_secureid);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "Basket-0102",
+							"description": "{{basket_id}}",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "6",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "86-13012345678",
+							"description": "852-11112222",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "merchant@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "card_number",
+							"value": "6222821234560017",
+							"description": " UPOP MIGS  5204730000002449   5123450000000008 4035501000000008 6222821234560017",
+							"type": "text"
+						},
+						{
+							"key": "expiry_month",
+							"value": "12",
+							"description": "12",
+							"type": "text"
+						},
+						{
+							"key": "expiry_year",
+							"value": "2033",
+							"description": "2049",
+							"type": "text"
+						},
+						{
+							"key": "cvv",
+							"value": "123",
+							"description": "244  123",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-03-09",
+							"type": "text"
+						},
+						{
+							"key": "tran_type",
+							"value": "ecomm_purchase",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}customer/validate",
+					"host": [
+						"{{URL}}customer"
+					],
+					"path": [
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.5 Initiate Payment Request (Without Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//pm.environment.get(\"token\");",
+							"//pm.environment.get(\"transaction_id_3.10\");",
+							"//pm.environment.get(\"basket_id\");",
+							"//pm.environment.get(\"txnamt\");",
+							"//pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.11_Payment\", jsonData.transaction_id);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "Basket-9999",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "6",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "merchant@gmail.com",
+							"description": "danyal.hassan@apps.net.pk",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "86-13012345678",
+							"description": " 86-13012345678",
+							"type": "text"
+						},
+						{
+							"key": "card_number",
+							"value": "6222821234560017",
+							"description": "Auth UPOP",
+							"type": "text"
+						},
+						{
+							"key": "expiry_month",
+							"value": "12",
+							"type": "text"
+						},
+						{
+							"key": "expiry_year",
+							"value": "2033",
+							"type": "text"
+						},
+						{
+							"key": "cvv",
+							"value": "123",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-03-09",
+							"type": "text"
+						},
+						{
+							"key": "otp_required",
+							"value": "yes",
+							"type": "text"
+						},
+						{
+							"key": "transaction_id",
+							"value": "{{transaction_id_3.10}}",
+							"type": "text"
+						},
+						{
+							"key": "otp",
+							"value": "111111",
+							"type": "text"
+						},
+						{
+							"key": "tran_type",
+							"value": "ecomm_purchase",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}transaction",
+					"host": [
+						"{{URL}}transaction"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

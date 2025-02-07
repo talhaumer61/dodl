@@ -1,0 +1,203 @@
+{
+	"info": {
+		"_postman_id": "fe3b93e7-a265-4842-ac88-ed2b7195e0a7",
+		"name": "invoice API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1.1. Create Invoice",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "fb0447fea8d89f0bdc6603399f0818f7b6b55e2e8f9c0e7334c173d9c9054181",
+						"username": "84d20a68-39b4-11ec-b1fd-005056a4e164"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"customer_email\": \"ikramulhaq65@gmail.com\",\r\n\"total_amount\": 100,\r\n\"invoice_ref_id\": \"A-101\",\r\n\"billing_month\": \"2022-01\",\r\n\"bill_category\": \"challan\",\r\n\"due_in_days\": 2,\r\n\"expires_in_days\": 3,\r\n\"description\": \"chllan for motorbike\"\r\n}"
+				},
+				"url": "https://invoice.apps.net.pk:7088/api/merchant/invoice/create"
+			},
+			"response": []
+		},
+		{
+			"name": "1.2. Update Invoice",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "fb0447fea8d89f0bdc6603399f0818f7b6b55e2e8f9c0e7334c173d9c9054181",
+						"username": "84d20a68-39b4-11ec-b1fd-005056a4e164"
+					}
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"invoice_number\": \"00019030000007\",\r\n\"expires_in_days\": \"3\",\r\n\"total_amount\": \"250\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "https://invoice.apps.net.pk:7088/api/merchant/invoice/update"
+			},
+			"response": []
+		},
+		{
+			"name": "1.3. Get Recurring Status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "fb0447fea8d89f0bdc6603399f0818f7b6b55e2e8f9c0e7334c173d9c9054181",
+						"username": "84d20a68-39b4-11ec-b1fd-005056a4e164"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"recurring_id\": 291,\r\n\"recurring_key\": \"952f2736-74e9-41da-b8af-ea48f278686e\",\r\n\"invoice_ref_id\": \"A-102\",\r\n\"status\": \"enable\",\r\n\"total_amount\": 300,\r\n\"customer_email\": \"ikramulhaq65@gmail.com\",\r\n\"customer_mobile\": \"03333061150\",\r\n\"total_invoices\": 700,\r\n\"cycle\": \"weekly\",\r\n\"invoices\": [\r\n{\r\n\"status\": \"enable\",\r\n\"payment_link\": \"\",\r\n\"date_due\": \"2022-01-08\",\r\n\"date_issued\": \"2022-01-03\",\r\n\"expiry_date\": \"2022-01-05\",\r\n\"consumer_number\": \"11111111111\",\r\n\"total\": 300,\r\n\"status_id\": 291,\r\n\"invoice_link\": \"abc.com\"\r\n}\r\n]\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://invoice.apps.net.pk:7088/api/merchant/recurring/?recurring_id={{recurring_id}}",
+					"protocol": "https",
+					"host": [
+						"invoice",
+						"apps",
+						"net",
+						"pk"
+					],
+					"port": "7088",
+					"path": [
+						"api",
+						"merchant",
+						"recurring",
+						""
+					],
+					"query": [
+						{
+							"key": "recurring_id",
+							"value": "{{recurring_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "1.4. Update Recurring Request",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "fb0447fea8d89f0bdc6603399f0818f7b6b55e2e8f9c0e7334c173d9c9054181",
+						"username": "84d20a68-39b4-11ec-b1fd-005056a4e164"
+					}
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"recurring_id\": \"291\",\r\n\"expires_in_days\": \"4\",\r\n\"total_amount\": 400,\r\n\"start_in_days\": 3,\r\n\"status\": \"true\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "https://invoice.apps.net.pk:7088/api/merchant/recurring/update"
+			},
+			"response": []
+		},
+		{
+			"name": "1.5. Create Recurring Request",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "fb0447fea8d89f0bdc6603399f0818f7b6b55e2e8f9c0e7334c173d9c9054181",
+						"username": "84d20a68-39b4-11ec-b1fd-005056a4e164"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"customer_email\": \"ikramulhaq65@gmail.com\",\r\n\"total_amount\": 300,\r\n\"invoice_ref_id\": \"A-102\",\r\n\"bill_category\": \"bill\",\r\n\"due_in_days\": 2,\r\n\"expires_in_days\": 3,\r\n\"description\": \"hello\",\r\n\"cycle\": \"weekly\",\r\n\"start_in_days\": 2,\r\n\"total_invoices\": 700\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "https://invoice.apps.net.pk:7088/api/merchant/recurring/create"
+			},
+			"response": []
+		},
+		{
+			"name": "1.6. Get Invoice Status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "fb0447fea8d89f0bdc6603399f0818f7b6b55e2e8f9c0e7334c173d9c9054181",
+						"username": "84d20a68-39b4-11ec-b1fd-005056a4e164"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"invoice_number\": \"<<invoice_number>>\",\r\n\"invoice_id\": \"00019030000006\",\r\n\"invoice_ref_id\": \"A-101\",\r\n\"status\": \"active\",\r\n\"total_amount\": 100,\r\n\"due_date\": \"2\",\r\n\"expiry_date\": \"3\",\r\n\"customer_email\": \"ikramulhaq65@gmail.com\",\r\n\"customer_mobile\": \"03333061150\",\r\n\"payment_link\": \"ssaaa\",\r\n\"last_payment_date\": \"2\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://invoice.apps.net.pk:7088/api/merchant/invoice?invoice_number={{invoice number}}",
+					"protocol": "https",
+					"host": [
+						"invoice",
+						"apps",
+						"net",
+						"pk"
+					],
+					"port": "7088",
+					"path": [
+						"api",
+						"merchant",
+						"invoice"
+					],
+					"query": [
+						{
+							"key": "invoice_number",
+							"value": "{{invoice number}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

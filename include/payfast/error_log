@@ -1,0 +1,1 @@
+[21-Jun-2023 07:02:56 UTC] PHP Parse error:  syntax error, unexpected '$_SESSION' (T_VARIABLE) in /home/greenprofessiona/public_html/admission.mul.edu.pk/PayFast/index.php on line 156

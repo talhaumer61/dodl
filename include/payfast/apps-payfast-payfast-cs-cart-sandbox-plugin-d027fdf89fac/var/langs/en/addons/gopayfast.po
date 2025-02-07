@@ -1,0 +1,81 @@
+msgid ""
+msgstr "Project-Id-Version: tygh\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language-Team: English\n"
+"Language: en_US"
+
+msgctxt "Addons::name::gopayfast"
+msgid "PayFast Payment Gateway"
+msgstr "PayFast Payment Gateway"
+
+msgctxt "Addons::description::gopayfast"
+msgid "PayFast lets you accept payments via Debit/Credit Cards/UnionPay/PayPak/Digital Wallets in Pakistan."
+msgstr "PayFast lets you accept payments via Debit/Credit Cards/UnionPay/PayPak/Digital Wallets in Pakistan."
+
+msgctxt "Languages::addons.gopayfast_rdv_message_key"
+msgid "RDV Message Key"
+msgstr "RDV Message Key"
+
+msgctxt "Languages::addons.gopayfast_status_code"
+msgid "Status Code"
+msgstr "Status Code"
+
+msgctxt "Languages::addons.gopayfast_failure_reason"
+msgid "Payment Failure Reason"
+msgstr "Payment Failure Reason"
+
+msgctxt "Languages::addons.gopayfast_secured_key"
+msgid "Merchant Secured Key"
+msgstr "Merchant Secured Key"
+
+msgctxt "Languages::addons.gopayfast_merchant_id"
+msgid "Merchant ID"
+msgstr "Merchant ID"
+
+msgctxt "Languages::addons.gopayfast_gopayfast_store_id"
+msgid "Store ID"
+msgstr "Store ID"
+
+
+msgctxt "Languages::addons.gopayfast_store_id"
+msgid "Store ID"
+msgstr "Store ID"
+
+msgctxt "Languages::addons.gopayfast_config_header"
+msgid "Merchant Configurations"
+msgstr "Merchant Configurations"
+
+msgctxt "Languages::addons.gopayfast_connect_failed"
+msgid "Unable to connect PayFast Gateway. Please contact your merchant"
+msgstr "Unable to connect PayFast Gateway. Please contact your merchant"
+
+msgctxt "Languages::addons.gopayfast_payment_failed_head"
+msgid "Payment Failed"
+msgstr "Payment Failed"
+
+msgctxt "Languages::addons.gopayfast_config_failed"
+msgid "Unable to connect PayFast Gateway. Invalid Payment Configurations."
+msgstr "Unable to connect PayFast Gateway. Invalid Payment Configurations."
+
+msgctxt "Languages::addons.gopayfast_config_failed_head"
+msgid "Payment Settings"
+msgstr "Payment Settings"
+
+msgctxt "Languages::addons.gopayfast_transaction_id"
+msgid "Transaction ID"
+msgstr "Transaction ID"
+
+msgctxt "Languages::addons.gopayfast_status"
+msgid "Transaction Status"
+msgstr "Transaction Status"
+
+msgctxt "Languages::addons.gopayfast_payment_instrment"
+msgid "Payment Instrument"
+msgstr "Payment Instrument"
+
+
+
+msgctxt "Languages::addons.gopayfast_payfast"
+msgid "PayFast"
+msgstr "PayFast"
+
