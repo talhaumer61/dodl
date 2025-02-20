@@ -1422,6 +1422,21 @@ function get_enroll_type($id) {
 		);
 	return $listenroll_type[$id];
 }
+
+// enrollment type
+$offering_type = array (
+	 array('id'=>1, 'name'=>'Paid')
+	,array('id'=>2, 'name'=>'Free')
+	,array('id'=>3, 'name'=>'Learn Free')
+);
+function get_offering_type($id) {
+	$listenroll_type= array (
+			 '1' => '<span class="badge badge-primary my-2">Paid</span>'
+			,'2' => '<span class="badge badge-success my-2">Free</span>'
+			,'3' => '<span class="badge badge-danger my-2">Learn Free</span>'
+		);
+	return $listenroll_type[$id];
+}
 function get_topic_content($id = '') {
 	$topic_content = array 	(
 							 '1'	=> 'Video'

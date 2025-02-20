@@ -102,6 +102,8 @@ if (CONTROLER == "about" || CONTROLER == "about-us"){
   include("include/privacy.php");
 } else if (CONTROLER == "invoice"){
   include("include/enroll/invoice.php");
+} else if (CONTROLER == "learn-free-invoice"){
+  include("include/enroll/learn_free_invoice.php");
 } else if (CONTROLER == "show-interest"){
   include("include/enroll/show_interest.php");
 } else if(CONTROLER == "home"){

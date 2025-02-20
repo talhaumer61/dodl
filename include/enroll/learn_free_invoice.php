@@ -3,37 +3,19 @@ require_once 'include/head.php';
 require_once 'include/top_nav.php';
 require_once 'include/breadcrumb.php';
 
-if (!isset($_POST['enroll'])) {
-  header("Location: ".SITE_URL."dashboard");
-}else if (!isset($_SESSION['userlogininfo'])) {
-  $_SESSION['search_path'] = $_POST['url'];
-  sessionMsg("Warning!","Your are not Login","warning");
-  header("location: ".SITE_URL."signup");
-}
 include_once 'query.php';
 
-$condition = array (
-                        'select' 		    =>	'w.wl_id ,w.id_type ,w.id_curs, w.id_mas, w.id_ad_prg
-                                            ,c.curs_name, c.curs_photo
-                                            ,m.mas_name, m.mas_photo
-                                            ,p.prg_name, p.prg_photo'
-                        ,'join' 		    =>	'LEFT JOIN '.COURSES.' c ON c.curs_id = w.id_curs
-                                             LEFT JOIN '.MASTER_TRACK.' m ON m.mas_id = w.id_mas
-                                             LEFT JOIN '.ADMISSION_PROGRAMS.' ap ON ap.id = w.id_ad_prg
-                                             LEFT JOIN '.PROGRAMS.' p ON p.prg_id = ap.id_prg' 
-                        ,'where' 		    =>	array( 
-                                                  'w.id_std'  => cleanvars($_SESSION['userlogininfo']['STDID']) 
-                                                ) 
-                        ,'order_by'     =>  "w.wl_id DESC"
-                        ,'return_type'	=>	'all'
-                    );                   
-if($_POST['curs_type_status'] == 5){
-  $condition['where']['w.id_curs']    = cleanvars($_POST['id']);
-  $condition['where']['w.id_mas']     = 0;
-  $condition['where']['w.id_ad_prg']  = 0;
-}
-$WISHLIST = $dblms->getRows(WISHLIST.' w',$condition);
-$found = false;
+$enroll_id=get_dataHashingOnlyExp(ZONE,false);
+$conditions = array ( 
+  'select'       =>	'ao.admoff_degree, ao.admoff_type'
+ ,'join'         =>	'INNER JOIN '.ADMISSION_OFFERING.' ao ON ec.id_curs = ao.admoff_degree'
+ ,'where' 		=>	array( 
+                              'ec.id_std'       => cleanvars($_SESSION['userlogininfo']['STDID']) 
+                             ,'ec.secs_id'      => cleanvars($enroll_id) 
+                         )
+ ,'return_type'	=>	'single'
+);
+$challanFor = $dblms->getRows(ENROLLED_COURSES.' ec', $conditions); 
 
 $condition  =   [ 
   'select'        =>  'o.org_link_to, o.org_percentage',
@@ -76,134 +58,7 @@ echo'
                         $i = 0;
                         $total = 0;
                         $priceFound = false;
-                        if($WISHLIST){
-                          foreach ($WISHLIST as $row) {                            
-                            $i++;
-                            $idWish   = '';
-                            $name     = '';
-                            $file_url = '';
-                            // NAME, PHOTO
-                            $photo = SITE_URL_PORTAL.'uploads/images/default_curs.jpg';
-                            if($row['id_type'] == 1){
-                              $idWish = $row['id_ad_prg'];
-                              $name = $row['prg_name'];
-                              $file_url = SITE_URL_PORTAL.'uploads/images/programs/'.$row['prg_photo'];
-                            }elseif($row['id_type'] == 2){
-                              $idWish = $row['id_mas'];
-                              $name = $row['mas_name'];
-                              $file_url = SITE_URL_PORTAL.'uploads/images/admissions/master_track/'.$row['mas_photo'];
-                            }elseif($row['id_type'] == 3 || $row['id_type'] == 4){
-                              $idWish = $row['id_curs'];
-                              $name = $row['curs_name'];
-                              $file_url = SITE_URL_PORTAL.'uploads/images/courses/'.$row['curs_photo'];                              
-                            }
-                            if($_POST['type'] == $row['id_type'] && $idWish == $_POST['id']){
-                              $found = true;
-                            }
-                            if (check_file_exists($file_url)) {
-                              $photo = $file_url;
-                            }
-                            // ADMOFF_AMOUNT
-                            $condition = array (
-                                                   'select'       =>	'ao.admoff_amount, ao.admoff_amount_in_usd, ao.id_type'
-                                                  ,'where' 		    =>	array( 
-                                                                             'ao.admoff_status'  => 1
-                                                                            ,'ao.admoff_type'    => cleanvars($row['id_type'])
-                                                                            ,'ao.admoff_degree'  => cleanvars($idWish)
-                                                                          ) 
-                                                  ,'return_type'	=>	'single'
-                                                ); 
-                            $ADMISSION_OFFERING = $dblms->getRows(ADMISSION_OFFERING.' AS ao',$condition, $sql);                            
-
-                            // DISCOUNT
-                            $condition = array ( 
-                                                   'select'       =>	'd.discount_id, d.discount_from, d.discount_to, dd.discount, dd.discount_type'
-                                                  ,'join'         =>  'INNER JOIN '.DISCOUNT_DETAIL.' AS dd ON d.discount_id = dd.id_setup AND dd.id_curs = "'.$idWish.'"'
-                                                  ,'where' 		    =>	array( 
-                                                                             'd.discount_status' 	=> '1' 
-                                                                            ,'d.is_deleted' 	    => '0'
-                                                                          )
-                                                  ,'search_by'    =>  ' AND d.discount_from <= CURRENT_DATE AND d.discount_to >= CURRENT_DATE '
-                                                  ,'return_type'	=>	'single'
-                                                );
-                            $DISCOUNT = $dblms->getRows(DISCOUNT.' AS d ', $condition);
-                            
-                            $currentDate    = date('Y-m-d');
-                            $startDate      = $DISCOUNT['discount_from'];
-                            $endDate        = $DISCOUNT['discount_to'];    
-                            $admoff_amount  = (__COUNTRY__ == 'pk' ? $ADMISSION_OFFERING['admoff_amount'] : $ADMISSION_OFFERING['admoff_amount_in_usd']);
-                            $currency_code  = (__COUNTRY__ == 'pk' ? 'PKR' : 'USD');
-                            $discount_web   = 0;
-                            $discount_org   = 0;
-
-                            // WEBSITE DISCOUNT
-                            if($DISCOUNT){
-                              if ($currentDate >= $startDate && $currentDate <= $endDate) {
-                                if ($DISCOUNT['discount_type'] == 1) {
-                                  $discount_web = $DISCOUNT['discount'];
-                                } else if ($DISCOUNT['discount_type'] == 2) {
-                                  $discount_web = ($admoff_amount * ($DISCOUNT['discount'] / 100) );
-                                }
-                              }
-                            }
-
-                            // ORG DISCOUNT
-                            if($ORGANIZATIONS){
-                              if (date('Y-m-d',strtotime($ORGANIZATIONS['org_link_to'])) >= $currentDate) {
-                                $discount_org = (($ORGANIZATIONS['org_percentage']/100)*$admoff_amount);
-                              }
-                            }
-
-                            // APPLY GREATER DISCOUNT
-                            if ($discount_org > $discount_web) {
-                              $admoff_amount -= $discount_org;
-                            } elseif ($discount_web > $discount_org) {
-                              $admoff_amount -= $discount_web;
-                            } else {                              
-                              $admoff_amount -= $discount_web;
-                            }
-                            $total += $admoff_amount;
-
-                            if($admoff_amount > 0){
-                              $priceFound = true;
-                            }
-                            echo '
-                            <tr>
-                              <td>
-                                <div class="sell-table-group d-flex align-items-center">
-                                  <div class="sell-group-img">
-                                    <a href="'.SITE_URL.'courses/'.$course['curs_id'].'">
-                                      <img alt="'.$photo.'" src="'.$photo.'" class="img-fluid">
-                                    </a>
-                                  </div>
-                                  <div class="sell-tabel-info">
-                                    <p>'.$name.'</p>
-                                    <div class="d-flex align-items-center border-bottom-0 pb-0">
-                                      <div class="rating-img d-flex align-items-center pe-3">
-                                        <img src="'.SITE_URL.'assets/img/icon/icon-01.svg" alt="">
-                                        <p>6</p>
-                                      </div>
-                                      <div class="course-view d-flex align-items-center">
-                                        <img src="'.SITE_URL.'assets/img/icon/timer-start.svg" alt="">
-                                        <p>6</p>
-                                      </div>
-                                    </div>
-                                      '.get_LeanerType($ADMISSION_OFFERING['id_type']).'
-                                  </div>
-                                </div>
-                                <input type="hidden" class="removable" name="id['.$i.']" value="'.$idWish.'">
-                                <input type="hidden" class="removable" name="type['.$i.']" value="'.$row['id_type'].'">
-                                <input type="hidden" class="removable" name="learn_type['.$i.']" value="'.$ADMISSION_OFFERING['id_type'].'">
-                                <input type="hidden" class="removable" name="name['.$i.']" value="'.$name.'">
-                                <input type="hidden" class="removable enroll_amount" name="amount['.$i.']" value="'.$admoff_amount.'">
-                              </td>
-                              <td class="text-center">'.get_enroll_type($row['id_type']).'</td>
-                              <td class="text-center">'.$currency_code.' '.$admoff_amount.'</td>
-                              <td class="text-center"><a href="javascript:;" onclick="remove_item(this)"><i class="fa fa-trash"></i></a></td>
-                            </tr>';
-                          }
-                        }
-                        if(!$found && isset($_POST['id'])){
+                        if(!empty($enroll_id)){
                           $i++;
                           $idWish   = '';
                           $name     = '';
@@ -214,19 +69,19 @@ echo'
                                               ,'where' 		    =>	array( 
                                                                            'ao.admoff_status'   =>  1
                                                                           ,'ao.is_deleted'      =>  0
-                                                                          ,'ao.admoff_degree'   =>  cleanvars($_POST['id'])
-                                                                          ,'ao.admoff_type'     =>  cleanvars($_POST['type'])
+                                                                          ,'ao.admoff_degree'   =>  cleanvars($challanFor['admoff_degree'])
+                                                                          ,'ao.admoff_type'     =>  cleanvars($challanFor['admoff_type'])
                                                                         ) 
                                               ,'return_type'	=>	'single'
                                             );
-                          if($_POST['type'] == 1){
+                          if($challanFor['admoff_type'] == 1){
                             $condition['select'] = 'ao.admoff_degree, ap.program, p.prg_photo, ao.admoff_amount, ao.admoff_amount_in_usd, ao.id_type';
                             $condition['join'] = 'LEFT JOIN '.ADMISSION_PROGRAMS.' ap ON ap.id = ao.admoff_degree
                                                   LEFT JOIN '.PROGRAMS.' p ON p.prg_id = ap.id_prg';
-                          }elseif($_POST['type'] == 2){
+                          }elseif($challanFor['admoff_type'] == 2){
                             $condition['select'] = 'ao.admoff_degree, m.mas_name, m.mas_photo, ao.admoff_amount, ao.admoff_amount_in_usd, ao.id_type';
                             $condition['join'] = 'LEFT JOIN '.MASTER_TRACK.' m ON m.mas_id = ao.admoff_degree';
-                          }elseif($_POST['type'] == 3 || $_POST['type'] == 4){
+                          }elseif($challanFor['admoff_type'] == 3 || $challanFor['admoff_type'] == 4){
                             $condition['select'] = 'ao.admoff_degree, c.curs_name, c.curs_photo, ao.admoff_amount, ao.admoff_amount_in_usd, ao.id_type';
                             $condition['join'] = 'LEFT JOIN '.COURSES.' c ON c.curs_id = ao.admoff_degree';
                           }
@@ -314,13 +169,13 @@ echo'
 
                           // NAME, PHOTO
                           $photo = SITE_URL_PORTAL.'uploads/images/default_curs.jpg';
-                          if($_POST['type'] == 1){
+                          if($challanFor['admoff_type'] == 1){
                             $name = $ADMISSION_OFFERING['prg_name'];
                             $file_url = SITE_URL_PORTAL.'uploads/images/programs/'.$ADMISSION_OFFERING['prg_photo'];
-                          }elseif($_POST['type'] == 2){
+                          }elseif($challanFor['admoff_type'] == 2){
                             $name = $ADMISSION_OFFERING['mas_name'];
                             $file_url = SITE_URL_PORTAL.'uploads/images/admissions/master_track/'.$ADMISSION_OFFERING['mas_photo'];
-                          }elseif($_POST['type'] == 3 || $_POST['type'] == 4){
+                          }elseif($challanFor['admoff_type'] == 3 || $challanFor['admoff_type'] == 4){
                             $name = $ADMISSION_OFFERING['curs_name'];
                             $file_url = SITE_URL_PORTAL.'uploads/images/courses/'.$ADMISSION_OFFERING['curs_photo'];
                           }
@@ -348,16 +203,17 @@ echo'
                                       <p>6</p>
                                     </div>
                                   </div>
-                                    '.get_LeanerType($ADMISSION_OFFERING['id_type']).'
+                                  '.get_LeanerType($ADMISSION_OFFERING['id_type']).'
                                 </div>
                               </div>                              
-                              <input type="hidden" class="removable" name="id['.$i.']" value="'.$ADMISSION_OFFERING['admoff_degree'].'">
-                              <input type="hidden" class="removable" name="type['.$i.']" value="'.$_POST['type'].'">
-                              <input type="hidden" class="removable" name="learn_type['.$i.']" value="'.$ADMISSION_OFFERING['id_type'].'">
-                              <input type="hidden" class="removable" name="name['.$i.']" value="'.$name.'">
-                              <input type="hidden" class="removable enroll_amount" name="amount['.$i.']" value="'.$admoff_amount.'">
+                              <input type="hidden" class="removable" name="id" value="'.$ADMISSION_OFFERING['admoff_degree'].'">
+                              <input type="hidden" class="removable" name="enroll_id" value="'.$enroll_id.'">
+                              <input type="hidden" class="removable" name="type" value="'.$challanFor['admoff_type'].'">
+                              <input type="hidden" class="removable" name="learn_type" value="'.$ADMISSION_OFFERING['id_type'].'">
+                              <input type="hidden" class="removable" name="name" value="'.$name.'">
+                              <input type="hidden" class="removable enroll_amount" name="amount" value="'.$admoff_amount.'">
                             </td>
-                            <td class="text-center">'.get_enroll_type($_POST['type']).'</td>
+                            <td class="text-center">'.get_enroll_type($challanFor['admoff_type']).'</td>
                             <td class="text-center">'.$currency_code.' '.$admoff_amount.'</td>
                             <td class="text-center"><a href="javascript:;" onclick="remove_item(this)"><i class="fa fa-trash"></i></a></td>
                           </tr>';
@@ -395,7 +251,7 @@ echo'
                   <a href="'.SITE_URL.$_POST['url'].'" class="btn btn-wish w-100 mr-1"><i class="fa fa-chevron-left" aria-="true"></i> Back</a>
                 </div>                      
                 <div class="col">
-                  <button name="enrolled_courses" type="submit" class="btn btn-enroll w-100">Enroll Now</button>
+                  <button name="enrolled_learn_free" type="submit" class="btn btn-enroll w-100">Enroll Now</button>
                 </div>
               </div>
             </div>

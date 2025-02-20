@@ -166,29 +166,32 @@ if($values){
               </div>';
             }
             */
-            echo'
-            <p class="m-0">';
-            if($course['id_type'] != 2){
-              $coursePrice = (__COUNTRY__ == 'pk') ? $course['admoff_amount'] : $course['admoff_amount_in_usd'];
-              if($course['curs_type_status'] != '1'){
-                if (!empty($DISCOUNT['discount_id'])) {
-                  echo'
-                  <small><s>'.(__COUNTRY__ == 'pk'?'PKR':'USD').' '.($coursePrice).'</s></small>
-                  <span class="text-info">/';
-                    if ($DISCOUNT['discount_type'] == 1) {
-                      echo ($coursePrice - $DISCOUNT['discount']);
-                    } else if ($DISCOUNT['discount_type'] == 2) {
-                      echo ($coursePrice - ($coursePrice * ($DISCOUNT['discount'] / 100) ));
-                    }
+            if($course['id_type']!=3){
+              echo'
+              <p class="m-0">';
+              if($course['id_type'] != 2){
+                $coursePrice = (__COUNTRY__ == 'pk') ? $course['admoff_amount'] : $course['admoff_amount_in_usd'];
+                if($course['curs_type_status'] != '1'){
+                  if (!empty($DISCOUNT['discount_id'])) {
                     echo'
-                  </span>';
-                } else {
-                  echo (__COUNTRY__ == 'pk'?'PKR':'USD').' '.($coursePrice);
+                    <small><s>'.(__COUNTRY__ == 'pk'?'PKR':'USD').' '.($coursePrice).'</s></small>
+                    <span class="text-info">/';
+                      if ($DISCOUNT['discount_type'] == 1) {
+                        echo ($coursePrice - $DISCOUNT['discount']);
+                      } else if ($DISCOUNT['discount_type'] == 2) {
+                        echo ($coursePrice - ($coursePrice * ($DISCOUNT['discount'] / 100) ));
+                      }
+                      echo'
+                    </span>';
+                  } else {
+                    echo (__COUNTRY__ == 'pk'?'PKR':'USD').' '.($coursePrice);
+                  }
                 }
               }
+              echo'
+              </p>';
             }
             echo'
-            </p>
             '.(CONTROLER == 'trainings' ? get_LeanerType($course['id_type']) : get_curs_status($course['curs_type_status'])).'
             <div class="course-group d-flex mb-0">';
               echo '<div class="course-share d-flex align-items-center justify-content-center" data-id="'.$course['curs_id'].'">';

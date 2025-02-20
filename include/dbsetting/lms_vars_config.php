@@ -101,6 +101,7 @@ define('QUIZ_QUESTIONS'                     , 'cms_quiz_questions');
 define('QUIZ_STUDENTS'                      , 'cms_quiz_students');
 define('QUIZ_STUDENT_DETAILS'               , 'cms_quiz_student_details');
 define('CHALLANS'                           , 'cms_challans');
+define('CHALLAN_DETAIL'                     , 'cms_challan_detail');
 define('STUDENT_EDUCATIONS'                 , 'cms_student_educations');
 define('GENERATED_CERTIFICATES'             , 'cms_generated_certificates');
 define('COURSES_WEEK_TITLE'                 , 'cms_courses_week_title');
