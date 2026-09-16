@@ -1,0 +1,534 @@
+{
+	"info": {
+		"_postman_id": "4cd4009c-025b-42d0-869b-e1aa0f69b991",
+		"name": "UAT mpg",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "3.1 AccessToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"//postman.setEnvironmentVariable(\"token\", jsonData.token);",
+							"//postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
+							"pm.environment.set(\"token\",  jsonData.token);",
+							"pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+							"});",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "merchant_id",
+							"value": "102",
+							"description": "1019, ",
+							"type": "text"
+						},
+						{
+							"key": "secured_key",
+							"value": "zWHjBp2AlttNu1sK",
+							"description": "17vi5bOjZ7b5bXC3Osq9,",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}token",
+					"host": [
+						"{{URL}}token"
+					]
+				},
+				"description": "Token Request"
+			},
+			"response": []
+		},
+		{
+			"name": "3.2 Refresh Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.environment.get(\"refresh_token\");",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"token\",  jsonData.token);",
+							"pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"type": "text"
+						},
+						{
+							"key": "refresh_token",
+							"value": "{{refresh_token}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}refreshtoken",
+					"host": [
+						"{{URL}}refreshtoken"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.5 Customer Validation (Without Token) 3ds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.environment.get(\"basket_id\");",
+							"pm.environment.get(\"txnamt\");",
+							"pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.10\",  jsonData.transaction_id);",
+							"pm.environment.set(\"3ds_secureid_3.10\",  jsonData.data_3ds_secureid);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "B2901",
+							"description": "{{basket_id}}",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "1550",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "03462601817",
+							"description": "03462601817",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "danyal.hassan@apps.net.pk",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "card_number",
+							"value": "5204730000002449",
+							"description": "UPOP MIGS  5204730000002449   5123450000000008 4035501000000008",
+							"type": "text"
+						},
+						{
+							"key": "expiry_month",
+							"value": "12",
+							"type": "text"
+						},
+						{
+							"key": "expiry_year",
+							"value": "2024",
+							"type": "text"
+						},
+						{
+							"key": "cvv",
+							"value": "244",
+							"description": "244 ",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-03-02",
+							"type": "text"
+						},
+						{
+							"key": "data_3ds_callback_url",
+							"value": "https://abc.com",
+							"type": "text"
+						},
+						{
+							"key": "store_id",
+							"value": "70",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "currency_code",
+							"value": "PKR",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}customer/validate",
+					"host": [
+						"{{URL}}customer"
+					],
+					"path": [
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.6 Initiate Payment Request (Without Token) 3ds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//pm.environment.get(\"token\");",
+							"//pm.environment.get(\"transaction_id_3.10\");",
+							"//pm.environment.get(\"basket_id\");",
+							"//pm.environment.get(\"txnamt\");",
+							"//pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.11_Payment\", jsonData.transaction_id);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "B2902",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "1550",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "danyal.hassan@apps.net.pk",
+							"description": "danyal.hassan@apps.net.pk",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "03462601817",
+							"type": "text"
+						},
+						{
+							"key": "card_number",
+							"value": "5204730000002449",
+							"type": "text"
+						},
+						{
+							"key": "expiry_month",
+							"value": "12",
+							"type": "text"
+						},
+						{
+							"key": "expiry_year",
+							"value": "2025",
+							"type": "text"
+						},
+						{
+							"key": "cvv",
+							"value": "244",
+							"type": "text"
+						},
+						{
+							"key": "account_title",
+							"value": "APPS",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-03-02",
+							"type": "text"
+						},
+						{
+							"key": "transaction_id",
+							"value": "{{transaction_id_3.10}}",
+							"type": "text"
+						},
+						{
+							"key": "data_3ds_secureid",
+							"value": "{{3ds_secureid_3.10}}",
+							"type": "text"
+						},
+						{
+							"key": "data_3ds_pares",
+							"value": "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",
+							"type": "text"
+						},
+						{
+							"key": "store_id",
+							"value": "70",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "currency_code",
+							"value": "PKR",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}transaction",
+					"host": [
+						"{{URL}}transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.7 Capture API for MIGS",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "txnamt",
+							"value": "5",
+							"description": "{{txnamt}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}transaction/capture/{{transaction_id_3.11_Payment}}",
+					"host": [
+						"{{URL}}transaction"
+					],
+					"path": [
+						"capture",
+						"{{transaction_id_3.11_Payment}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.8 Void transaction MIGS",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "{{URL}}transaction/void/8d76eff1-8b04-2140-e635-9fddac3002ae",
+					"host": [
+						"{{URL}}transaction"
+					],
+					"path": [
+						"void",
+						"8d76eff1-8b04-2140-e635-9fddac3002ae"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

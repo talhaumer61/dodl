@@ -1,0 +1,486 @@
+{
+	"info": {
+		"_postman_id": "e58c8330-5566-49f6-a358-167e37d68674",
+		"name": "Account Based Transaction (UAT)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "3.1 AccessToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"//postman.setEnvironmentVariable(\"token\", jsonData.token);",
+							"//postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
+							"pm.environment.set(\"token\",  jsonData.token);",
+							"pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+							"});",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"description": "// grant type is set to client credentials as APPS would be sending its merchant id and secret key",
+							"type": "text"
+						},
+						{
+							"key": "secured_key",
+							"value": "zWHjBp2AlttNu1sK",
+							"description": "// test secret key ",
+							"type": "text"
+						},
+						{
+							"key": "merchant_id",
+							"value": "102",
+							"description": "// test merchant id ",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://apipxyuat.apps.net.pk:8443/api/token",
+					"protocol": "https",
+					"host": [
+						"apipxyuat",
+						"apps",
+						"net",
+						"pk"
+					],
+					"port": "8443",
+					"path": [
+						"api",
+						"token"
+					]
+				},
+				"description": "Token Request"
+			},
+			"response": []
+		},
+		{
+			"name": "3.2 Issuer/Banks list",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://apipxyuat.apps.net.pk:8443/api/list/banks",
+					"protocol": "https",
+					"host": [
+						"apipxyuat",
+						"apps",
+						"net",
+						"pk"
+					],
+					"port": "8443",
+					"path": [
+						"api",
+						"list",
+						"banks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3 Customer Validation (Without Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.environment.get(\"basket_id\");",
+							"pm.environment.get(\"txnamt\");",
+							"pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.10\",  jsonData.transaction_id);",
+							"pm.environment.set(\"3ds_secureid_3.10\",  jsonData.data_3ds_secureid);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "NEW002",
+							"description": "//the order id of the transaction",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "2501",
+							"description": "// transaction amount",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "03431273726",
+							"description": "// customer mobile number",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "danyal.hassan@apps.net.pk",
+							"description": "//customer email address (Optional for account based transaction)",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "3",
+							"description": "//account type id = 3 (For account)  //account type id = 4 (For wallet)",
+							"type": "text"
+						},
+						{
+							"key": "bank_code",
+							"value": "11",
+							"description": "// bank code to be used",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-01-26",
+							"description": "// order date in yyyy-mm-dd format",
+							"type": "text"
+						},
+						{
+							"key": "account_number",
+							"value": "{{account_number}}",
+							"type": "text"
+						},
+						{
+							"key": "cnic_number",
+							"value": "{{cnic_number}}",
+							"type": "text"
+						},
+						{
+							"key": "otp_required",
+							"value": "yes",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://apipxyuat.apps.net.pk:8443/api/customer/validate",
+					"protocol": "https",
+					"host": [
+						"apipxyuat",
+						"apps",
+						"net",
+						"pk"
+					],
+					"port": "8443",
+					"path": [
+						"api",
+						"customer",
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4 Initiate Payment Request (Without Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//pm.environment.get(\"token\");",
+							"//pm.environment.get(\"transaction_id_3.10\");",
+							"//pm.environment.get(\"basket_id\");",
+							"//pm.environment.get(\"txnamt\");",
+							"//pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.11_Payment\", jsonData.transaction_id);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"strictSSL": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "NEW002",
+							"description": "//the order id of the transaction",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "2501",
+							"description": "// transaction amount",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "danyal.hassan@apps.net.pk",
+							"description": "//customer email address (Optional for account based transaction)",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "3",
+							"description": "//account type id = 3 (For account)  //account type id = 4 (For wallet)\n",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "03462601817",
+							"description": "// customer mobile number",
+							"type": "text"
+						},
+						{
+							"key": "account_number",
+							"value": "{{account_number}}",
+							"description": "// account number",
+							"type": "text"
+						},
+						{
+							"key": "cnic_number",
+							"value": "{{cnic_number}}",
+							"description": "//cnic",
+							"type": "text"
+						},
+						{
+							"key": "bank_code",
+							"value": "11",
+							"description": "// bank code",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-01-26",
+							"description": "// order date ",
+							"type": "text"
+						},
+						{
+							"key": "otp_required",
+							"value": "yes",
+							"description": "// otp required (mandatory for account based transaction)",
+							"type": "text"
+						},
+						{
+							"key": "otp",
+							"value": "123456",
+							"description": "// otp",
+							"type": "text"
+						},
+						{
+							"key": "transaction_id",
+							"value": "{{transaction_id_3.10}}",
+							"description": "// transaction id fetched from customer enquiry",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://apipxyuat.apps.net.pk:8443/api/transaction",
+					"protocol": "https",
+					"host": [
+						"apipxyuat",
+						"apps",
+						"net",
+						"pk"
+					],
+					"port": "8443",
+					"path": [
+						"api",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.5 Get Transaction Details/Status (Transaction ID)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "zWHjBp2AlttNu1sK",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "102",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://payfast-portal.apps.net.pk:5557/api/transaction/view/id?transaction_id=ce22af37-aa98-4a8c-9a38-9cb5d6f7d00e",
+					"protocol": "https",
+					"host": [
+						"payfast-portal",
+						"apps",
+						"net",
+						"pk"
+					],
+					"port": "5557",
+					"path": [
+						"api",
+						"transaction",
+						"view",
+						"id"
+					],
+					"query": [
+						{
+							"key": "transaction_id",
+							"value": "ce22af37-aa98-4a8c-9a38-9cb5d6f7d00e"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

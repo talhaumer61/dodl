@@ -1,0 +1,447 @@
+{
+	"info": {
+		"_postman_id": "f1edfe78-8281-42d9-b602-a220dfb39734",
+		"name": "Production Easypaisa Collection with production easypaisa account",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "3.1 Access Token ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"//postman.setEnvironmentVariable(\"token\", jsonData.token);",
+							"//postman.setEnvironmentVariable(\"refresh_token\", jsonData.refresh_token);",
+							"pm.environment.set(\"token\",  jsonData.token);",
+							"pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+							"});",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "merchant_id",
+							"value": "102",
+							"type": "text"
+						},
+						{
+							"key": "secured_key",
+							"value": "NNklS4IZ0JRpmwTpOyd",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}token",
+					"host": [
+						"{{URL}}token"
+					]
+				},
+				"description": "Test"
+			},
+			"response": []
+		},
+		{
+			"name": "3.2 Refresh Token prod",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.environment.get(\"refresh_token\");",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"token\",  jsonData.token);",
+							"pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"type": "text"
+						},
+						{
+							"key": "refresh_token",
+							"value": "{{refresh_token}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}refreshtoken",
+					"host": [
+						"{{URL}}refreshtoken"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3 Issuer/Banks list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "{{URL}}list/banks",
+					"host": [
+						"{{URL}}list"
+					],
+					"path": [
+						"banks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4 Customer Validation (Without Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.get(\"token\");",
+							"pm.environment.get(\"basket_id\");",
+							"pm.environment.get(\"txnamt\");",
+							"pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.10\",  jsonData.transaction_id);",
+							"pm.environment.set(\"3ds_secureid_3.10\",  jsonData.data_3ds_secureid);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "3Mar-Random Order9",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "034311271277",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "danyal.hassan@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "4",
+							"type": "text"
+						},
+						{
+							"key": "bank_code",
+							"value": "13",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-01-03",
+							"type": "text"
+						},
+						{
+							"key": "account_title",
+							"value": "Syed Danyal Hassan",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "account_number",
+							"value": "03431127127",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}customer/validate",
+					"host": [
+						"{{URL}}customer"
+					],
+					"path": [
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.5 Initiate Payment Request (Without Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//pm.environment.get(\"token\");",
+							"//pm.environment.get(\"transaction_id_3.10\");",
+							"//pm.environment.get(\"basket_id\");",
+							"//pm.environment.get(\"txnamt\");",
+							"//pm.environment.get(\"order_date\");",
+							"",
+							"pm.test(\"ResponseBody Data\", function() {",
+							"    var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"transaction_id_3.11_Payment\", jsonData.transaction_id);",
+							"});",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "basket_id",
+							"value": "3Mar-Random Order9",
+							"type": "text"
+						},
+						{
+							"key": "txnamt",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "customer_email_address",
+							"value": "danyal.hassan@apps.net.pk",
+							"description": "saqib@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "account_type_id",
+							"value": "4",
+							"type": "text"
+						},
+						{
+							"key": "customer_mobile_no",
+							"value": "03431127127",
+							"description": "03462601817",
+							"type": "text"
+						},
+						{
+							"key": "account_number",
+							"value": "03431127127",
+							"description": "03452468994",
+							"type": "text"
+						},
+						{
+							"key": "bank_code",
+							"value": "13",
+							"type": "text"
+						},
+						{
+							"key": "transaction_id",
+							"value": "{{transaction_id_3.10}}",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-01-03",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{URL}}transaction",
+					"host": [
+						"{{URL}}transaction"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

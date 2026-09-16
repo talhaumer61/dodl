@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<payfast scheme="3.0">
+    <apiconfig>
+        <token_url>https://ipguat.apps.net.pk/Ecommerce/api/Transaction/GetAccessToken</token_url>
+        <transaction_url>https://ipguat.apps.net.pk/Ecommerce/api/Transaction/PostTransaction</transaction_url>
+        <transaction_api>
+            <baseurl></baseurl>
+        </transaction_api>
+    </apiconfig>
+</payfast>
