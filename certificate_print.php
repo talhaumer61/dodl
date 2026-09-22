@@ -6,7 +6,7 @@ echo'
     <meta charset="utf-8">
     <title>'.moduleName(CONTROLER).'</title>
     <link rel="shortcut icon" type="image/x-icon" href="'.SITE_URL.'/assets/img/favicon.ico"/>    
-    <script src="'.SITE_URL.'assets/js/qr-code-styling.js"></script>
+    <script src="'.SITE_URL.'assets/js/qrcode.min.js"></script>
 </head>
 <style type="text/css">
     body {overflow: -moz-scrollbars-vertical; margin:0; font-family: Arial, Helvetica, sans-serif, Calibri, "Calibri Light";  }
@@ -14,19 +14,9 @@ echo'
         .page-break	{ display: none; }
     }
     @page {
-        size: A4 landscape;
+        size: A4 portrait; 
         margin: 0;
     }
-    h1 { text-align:left; margin:0; margin-top:0; margin-bottom:0px; font-size:18px; font-weight:700; text-transform:uppercase; }
-    .spanh1 { font-size:14px; font-weight:normal; text-transform:none; float:right; margin-top:5px; }
-    h2 { text-align:left; margin:0; margin-top:0; margin-bottom:1px; font-size:18px; font-weight:700; text-transform:uppercase; }
-    .spanh2 { font-size:16px; font-weight:700; text-transform:none; }
-    h3 { text-align:center; margin:0; margin-top:0; margin-bottom:1px; font-size:18px; font-weight:700; text-transform:uppercase; }
-    h4 { 
-        text-align:center; margin:0; margin-bottom:1px; font-weight:normal; font-size:15px; font-weight:700; word-spacing:0.1em;  
-    }
-    td { padding-bottom:4px; font-family: Arial, Helvetica, sans-serif, Calibri, "Calibri Light"; }
-    .line1 { border:1px solid #333; width:100%; margin-top:2px; margin-bottom:5px; }
     
     .btn-print {
         background: #159f46;
@@ -51,6 +41,14 @@ echo'
         margin: 0.25rem 1rem;
         cursor: pointer;
     }
+
+    /* Container for absolute positioning */
+    .cert-container {
+        position: relative;
+        width: 100%;
+        height: 11.4in; /* Slightly less than 11.69 to prevent page bleed */
+    }
+    
 </style>';
 if(!empty(ZONE)){
     if($_SESSION['userlogininfo']['LOGINIDA']){
@@ -111,30 +109,32 @@ if(!empty(ZONE)){
                     $emply_specialization   = $row['emply_specialization'];
                 } else {
                     $conditions = array ( 
-                                            'select'       =>	'ec.secs_id, ec.id_type, ec.id_std, ec.id_curs, ec.id_mas, ec.id_ad_prg, s.std_name, c.curs_id, c.curs_name, c.curs_hours, m.mas_id, m.mas_name, ap.id, ap.program
-                                                                ,e.emply_name, e.emply_specialization
-                                                                ,COUNT(DISTINCT cl.lesson_id) as lesson_count
-                                                                ,COUNT(DISTINCT ca.id) as assignment_count
-                                                                ,COUNT(DISTINCT cq.quiz_id) as quiz_count
-                                                                ,COUNT(DISTINCT lt.track_id) as track_count'
-                                            ,'join'         =>	'INNER JOIN '.STUDENTS.' s ON s.std_id = ec.id_std AND s.is_deleted = 0 AND s.std_status = 1
-                                                                LEFT JOIN '.ALLOCATE_TEACHERS.' alte ON alte.id_curs = ec.id_curs
-                                                                LEFT JOIN '.EMPLOYEES.' e ON e.emply_id = alte.id_teacher AND e.emply_status = 1 AND e.is_deleted = 0
-                                                                LEFT JOIN '.ADMISSION_PROGRAMS.' ap ON ap.id = ec.id_ad_prg
-                                                                LEFT JOIN '.MASTER_TRACK.' m ON m.mas_id = ec.id_mas
-                                                                LEFT JOIN '.COURSES.' c ON c.curs_id = ec.id_curs
-                                                                LEFT JOIN '.COURSES_LESSONS.' cl ON FIND_IN_SET(cl.id_curs, ec.id_curs) AND cl.lesson_status = 1 AND cl.is_deleted = 0
-                                                                LEFT JOIN '.COURSES_ASSIGNMENTS.' ca ON FIND_IN_SET(ca.id_curs, ec.id_curs) AND ca.status = 1 AND ca.is_deleted = 0
-                                                                LEFT JOIN '.QUIZ.' cq ON FIND_IN_SET(cq.id_curs, ec.id_curs) AND cq.quiz_status = 1 AND cq.is_deleted = 0 AND cq.is_publish = 1
-                                                                LEFT JOIN '.LECTURE_TRACKING.' lt ON FIND_IN_SET(lt.id_curs, ec.id_curs) AND lt.id_std = '.cleanvars($_SESSION['userlogininfo']['STDID']).' AND lt.is_completed = 2 AND lt.is_deleted = 0 AND lt.id_mas = ec.id_mas AND lt.id_ad_prg = ec.id_ad_prg'
-                                            ,'where' 		=>	array( 
-                                                                        'ec.is_deleted'    => '0'
-                                                                        ,'ec.secs_status'   => '1'
-                                                                        ,'ec.id_std' 	    => cleanvars($_SESSION['userlogininfo']['STDID']) 
-                                                                        ,'ec.secs_id' 	    => cleanvars(ZONE) 
-                                                                    )
-                                            ,'return_type'	=>	'count'
-                                        );
+                                    'select'        =>   'ec.secs_id, ec.id_type, ec.id_std, ec.id_curs, ec.id_mas, ec.id_ad_prg, s.std_name, c.curs_id, c.curs_name, c.curs_hours, m.mas_id, m.mas_name, ap.id, ap.program
+                                                        ,GROUP_CONCAT(DISTINCT e.emply_name ORDER BY e.emply_name SEPARATOR ", ") as emply_name
+                                                        ,GROUP_CONCAT(DISTINCT e.emply_specialization ORDER BY e.emply_name SEPARATOR ", ") as emply_specialization
+                                                        ,COUNT(DISTINCT cl.lesson_id) as lesson_count
+                                                        ,COUNT(DISTINCT ca.id) as assignment_count
+                                                        ,COUNT(DISTINCT cq.quiz_id) as quiz_count
+                                                        ,COUNT(DISTINCT lt.track_id) as track_count'
+                                    ,'join'         =>  'INNER JOIN '.STUDENTS.' s ON s.std_id = ec.id_std AND s.is_deleted = 0 AND s.std_status = 1
+                                                        LEFT JOIN '.ALLOCATE_TEACHERS.' alte ON alte.id_curs = ec.id_curs
+                                                        LEFT JOIN '.EMPLOYEES.' e ON FIND_IN_SET(e.emply_id, alte.id_teacher) AND e.emply_status = 1 AND e.is_deleted = 0
+                                                        LEFT JOIN '.ADMISSION_PROGRAMS.' ap ON ap.id = ec.id_ad_prg
+                                                        LEFT JOIN '.MASTER_TRACK.' m ON m.mas_id = ec.id_mas
+                                                        LEFT JOIN '.COURSES.' c ON c.curs_id = ec.id_curs
+                                                        LEFT JOIN '.COURSES_LESSONS.' cl ON FIND_IN_SET(cl.id_curs, ec.id_curs) AND cl.lesson_status = 1 AND cl.is_deleted = 0
+                                                        LEFT JOIN '.COURSES_ASSIGNMENTS.' ca ON FIND_IN_SET(ca.id_curs, ec.id_curs) AND ca.status = 1 AND ca.is_deleted = 0
+                                                        LEFT JOIN '.QUIZ.' cq ON FIND_IN_SET(cq.id_curs, ec.id_curs) AND cq.quiz_status = 1 AND cq.is_deleted = 0 AND cq.is_publish = 1
+                                                        LEFT JOIN '.LECTURE_TRACKING.' lt ON FIND_IN_SET(lt.id_curs, ec.id_curs) AND lt.id_std = '.cleanvars($_SESSION['userlogininfo']['STDID']).' AND lt.is_completed = 2 AND lt.is_deleted = 0 AND lt.id_mas = ec.id_mas AND lt.id_ad_prg = ec.id_ad_prg'
+                                    ,'where'        =>  array( 
+                                                            'ec.is_deleted'    => '0'
+                                                            ,'ec.secs_status'   => '1'
+                                                            ,'ec.id_std'        => cleanvars($_SESSION['userlogininfo']['STDID']) 
+                                                            ,'ec.secs_id'       => cleanvars(ZONE) 
+                                                        )
+                                    ,'group_by'     =>  'ec.secs_id, ec.id_std, ec.id_curs, ec.id_mas, ec.id_ad_prg'
+                                    ,'return_type'  =>  'single' // Or 'all' depending on expected output set
+                                );
                     $count = $dblms->getRows(ENROLLED_COURSES.' ec', $conditions);
                     if($count){
                         $conditions['return_type'] = 'single';
@@ -206,248 +206,223 @@ if(!empty(ZONE)){
                         $id_enroll  = $row['secs_id'];
                     }
                 }
+                
+                // DATA FOR QR CODE
+                $dataQR = array(
+                    'cert_id'       => $latestID,
+                    'id_std'        => $id_std,
+                    'id_enroll'     => $id_enroll,
+                );
+                $dataJSON = get_dataHashingOnlyExp(json_encode($dataQR), true);
+
                 if($row){
                     if($percent == '100'){
-                        if($cert_type == 3){
+                        if($cert_type == 3){ // COURSE CERTIFICATE
                             echo'
                             <style type="text/css">
                                 @media print {
-                                    .page-break	{ display: block; page-break-before: always; }
-                                    @page {
-                                        size: A4 landscape;
-                                        margin: 0;
-                                    }
-                                    body {
-                                        -webkit-print-color-adjust: exact; /* For Chrome */
-                                        background-image: url("'.SITE_URL.'assets/img/certificate.jpg");
-                                        background-size: cover;
-                                    }
+                                    .page-break { display: none !important; }
+                                    @page { size: A4 portrait; margin: 0; }
+                                    body, html { margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
                                 }
                                 
-                                #main_table {
-                                    background-image: url("'.SITE_URL.'assets/img/certificate.jpg");
-                                    background-size: cover;
-                                    background-position: center;
-                                    height: 8.27in;
-                                    width: 11.69in;
-                                    border-collapse: collapse;
+                                body, html {
+                                    margin: 0;
+                                    padding: 0;
+                                    overflow-x: hidden;
                                 }
+
+                                #certificate_wrapper {
+                                    width: 8.27in;
+                                    height: 11.65in; /* Scaled down slightly from 11.69in to prevent page overflow */
+                                    margin: 0 auto;
+                                    position: relative;
+                                    background: #ffffff;
+                                    overflow: hidden;
+                                    page-break-inside: avoid;
+                                    page-break-after: avoid;
+                                }
+
+                                .cert-bg-img {
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                    width: 100%;
+                                    height: 100%;
+                                    z-index: 1;
+                                    object-fit: cover;
+                                }
+
+                                .cert-container {
+                                    position: relative;
+                                    z-index: 2;
+                                    width: 100%;
+                                    height: 100%;
+                                }
+
+                                .cert-no { position: absolute; top: 9.6%; right: 19.5%; font-size: 10px; font-weight: bold; color: #9b9c9e; }
+                                .std-name { position: absolute; top: 39%; left: 0; right: 0; margin: 0 auto; text-align: center; font-size: 26px; font-weight: bold; width: 80%; }
+                                .course-name { position: absolute; top: 53%; left: 0; right: 0; margin: 0 auto; text-align: center; font-size: 20px; font-weight: bold; width: 80%; }
+                                .duration-text { color: #ff602e; position: absolute; top: 72.9%; left: 36.5%; margin: 0 auto; text-align: center; font-size: 18px; font-weight: bold; width: 200px; margin-top:-2rem;}
+                                .date-text { color: #ff602e; position: absolute; top: 72.9%; right: 12.8%; text-align: center; font-size: 18px; font-weight: bold; width: 200px; margin-top:-2rem;}
+                                .qr-box { position: absolute; bottom: 6%; left: 14%; }
+                                .employee-text { color: #ff602e; position: absolute; top: 70%; left: 11%; right: 0; text-align: center; font-size: 18px; font-weight: bold; width: 25%; }
                             </style>
                             <body>
                                 <center id="hide_on_download">
                                     <button class="btn-print" onclick="printAndRedirect()">Download Certificate</button>
                                     <a href="'.SITE_URL.'student/courses" class="btn-back">Go Back</a>
                                 </center>
-                                <table id="main_table" width="99%" border="0" class="page " cellpadding="5" cellspacing="10" align="center" style="border-collapse:collapse; margin-top:0px;">
-                                    <tr>
-                                        <td width="341" valign="top">
-                                            <div>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 17rem;">
-                                                    <tr>
-                                                        <td width="200" style="font-size:16px; font-weight:bold; text-align: center">'.date('M d, Y', strtotime($dated)).'</td>
-                                                        <td></td>
-                                                        <td width="200" style="font-size:16px; font-weight:bold; text-align: center">'.$cert_no.'</td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 2rem;">
-                                                    <tr>
-                                                        <td style="font-size:30px; font-weight:bold; text-align: center">'.$std_name.'</td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 3rem;">
-                                                    <tr>
-                                                        <td style="font-size:22px; font-weight:bold; text-align: center">'.html_entity_decode(html_entity_decode($cert_name)).' ('.get_enroll_type($cert_type).')</td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 0.3rem;">
-                                                    <tr>
-                                                        <td></td>
-                                                        <td width="270" style="font-size:20px; font-weight:bold; text-align: right">'.$curs_hours.' Hours</td>
-                                                        <td></td>
-                                                    </tr>
-                                                </table>                                    
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 11rem;">
-                                                    <tr>
-                                                        <td></td>
-                                                        <td width="100">';
-                                                            $dataQR = array(
-                                                                'cert_id'       => $latestID,
-                                                                'id_std'        => $id_std,
-                                                                'id_enroll'     => $id_enroll,
-                                                            );
-                                                            $dataJSON = get_dataHashingOnlyExp(json_encode($dataQR), true);
-                                                            echo '
-                                                            <div id="qrcode"></div>
-                                                            <script>
-                                                            const qrCode = new QRCodeStyling({
-                                                                width: 100,
-                                                                height: 100,
-                                                                type: "svg",
-                                                                data: \''.SITE_URL.'verify-certificate/'.$dataJSON.'\',
-                                                                qrOptions: {
-                                                                    errorCorrectionLevel: "H"
-                                                                }
-                                                            });
 
-                                                            qrCode.append(document.getElementById("qrcode"));
-                                                            </script>                                        
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-                                            <div style="clear:both;"></div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </body>
-                            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
-                            <script type="text/javascript">
-                                function printAndRedirect() {
-                                    document.querySelector("#hide_on_download").style.display = "none"; // Hide print button
-                                    
-                                    const element = document.body; // Get the entire body of the page
+                                <div id="certificate_wrapper">
+                                    <img class="cert-bg-img" src="'.SITE_URL.'assets/img/certificates/course-certificate.jpeg" crossorigin="anonymous" alt="Certificate Background" />
 
-                                    // Options for html2pdf.js
-                                    const opt = {
-                                        margin:       0,
-                                        filename:     "'.to_seo_url($cert_no.'-'.$cert_name.'-'.$std_name).'.pdf",
-                                        image:        { type: "jpeg", quality: 0.98 },
-                                        html2canvas:  { dpi: 192, letterRendering: true, backgroundColor: "#ffffff" },
-                                        jsPDF:        { unit: "mm", format: "a4", orientation: "landscape" }
-                                    };
-
-                                    // Convert the entire body of the page into a PDF and download it
-                                    html2pdf().from(element).set(opt).save();
-                                    // window.location.href = "'.SITE_URL.'student/courses"; 
-                                }
-                            </script>
-                            </html>';
-                        } else if ($cert_type == 4) {
+                                    <div class="cert-container">
+                                        <div class="cert-no">'.$cert_no.'</div>
+                                        <div class="std-name">'.$std_name.'</div>
+                                        <div class="course-name">'.html_entity_decode(html_entity_decode($cert_name)).' ('.get_enroll_type($cert_type).')</div>
+                                        <div class="employee-text">
+                                            '.implode(', <br>', array_map('trim', explode(',', $emply_name))).'
+                                        </div>
+                                        <div class="duration-text">'.$curs_hours.' Hours</div>
+                                        <div class="date-text">'.date('M d, Y', strtotime($dated)).'</div>
+                                        <div class="qr-box">
+                                            <div id="qrcode"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </body>';
+                        } else if ($cert_type == 4) { // TRAINING CERTIFICATE
                             echo'
                             <style type="text/css">
                                 @media print {
-                                    .page-break	{ display: block; page-break-before: always; }
-                                    @page {
-                                        size: A4 landscape;
-                                        margin: 0;
-                                    }
-                                    body {
-                                        -webkit-print-color-adjust: exact; /* For Chrome */
-                                        background-image: url("'.SITE_URL.'assets/img/training-certificate.jpg");
-                                        background-size: cover;
-                                    }
+                                    .page-break { display: none !important; }
+                                    @page { size: A4 portrait; margin: 0; }
+                                    body, html { margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
                                 }
-                                
-                                #main_table {
-                                    background-image: url("'.SITE_URL.'assets/img/training-certificate.jpg");
-                                    background-size: cover;
-                                    background-position: center;
-                                    height: 8.27in;
-                                    width: 11.69in;
-                                    border-collapse: collapse;
+
+                                body, html {
+                                    margin: 0;
+                                    padding: 0;
+                                    overflow-x: hidden;
                                 }
+
+                                #certificate_wrapper {
+                                    width: 8.27in;
+                                    height: 11.65in; /* Scaled down slightly from 11.69in to prevent page overflow */
+                                    margin: 0 auto;
+                                    position: relative;
+                                    background: #ffffff;
+                                    overflow: hidden;
+                                    page-break-inside: avoid;
+                                    page-break-after: avoid;
+                                }
+
+                                .cert-bg-img {
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                    width: 100%;
+                                    height: 100%;
+                                    z-index: 1;
+                                    object-fit: cover;
+                                }
+
+                                .cert-container {
+                                    position: relative;
+                                    z-index: 2;
+                                    width: 100%;
+                                    height: 100%;
+                                }
+
+                                .cert-no { position: absolute; top: 9.6%; right: 19.5%; font-size: 10px; font-weight: bold; color: #9b9c9e; }
+                                .std-name { position: absolute; top: 39%; left: 0; right: 0; margin: 0 auto; text-align: center; font-size: 26px; font-weight: bold; width: 80%; }
+                                .course-name { position: absolute; top: 55%; left: 0; right: 0; margin: 0 auto; text-align: center; font-size: 20px; font-weight: bold; width: 80%; }
+                                .duration-text { color: #ff602e; position: absolute; top: 72.9%; left: 36.5%; margin: 0 auto; text-align: center; font-size: 18px; font-weight: bold; width: 200px; margin-top:-2rem;}
+                                .date-text { color: #ff602e; position: absolute; top: 72.9%; right: 12.8%; text-align: center; font-size: 18px; font-weight: bold; width: 200px; margin-top:-2rem;}
+                                .qr-box { position: absolute; bottom: 6%; left: 14%; }
+                                .employee-text { color: #ff602e; position: absolute; top: 70%; left: 11%; right: 0; text-align: center; font-size: 18px; font-weight: bold; width: 25%; }
                             </style>
                             <body>
                                 <center id="hide_on_download">
                                     <button class="btn-print" onclick="printAndRedirect()">Download Certificate</button>
                                     <a href="'.SITE_URL.'student/trainings" class="btn-back">Go Back</a>
                                 </center>
-                                <table id="main_table" width="99%" border="0" class="page " cellpadding="5" cellspacing="10" align="center" style="border-collapse:collapse; margin-top:0px;">
-                                    <tr>
-                                        <td width="341" valign="top">
-                                            <div>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 9.5rem;">
-                                                    <tr>
-                                                        <td width="200" style="font-size:16px; font-weight:bold; text-align: center">'.date('M d, Y', strtotime($dated)).'</td>
-                                                        <td></td>
-                                                        <td width="200" style="font-size:16px; font-weight:bold; text-align: center">'.$cert_no.'</td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 7rem;">
-                                                    <tr>
-                                                        <td style="font-size:24px; font-weight:bold; text-align: left" width="12%"></td>
-                                                        <td style="font-size:24px; font-weight:bold; text-align: center">'.$std_name.'</td>
-                                                        <td style="font-size:24px; font-weight:bold; text-align: left" width="60%"></td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 2.7rem;">
-                                                    <tr>
-                                                        <td style="font-size:24px; font-weight:bold; text-align: center">'.html_entity_decode(html_entity_decode($cert_name)).'</td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 3.6rem;">
-                                                    <tr>
-                                                        <td></td>
-                                                        <td width="270" style="font-size:20px; font-weight:bold; text-align: right">'.$curs_hours.' '.($curs_hours>1 ? 'Hours' : 'Hour').'</td>
-                                                        <td></td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 0.2rem;">
-                                                    <tr>
-                                                        <td width="550"></td>
-                                                        <td style="font-size:20px; font-weight:bold; text-align: left">'.$emply_name.' '.($emply_specialization != '' ? '('.$emply_specialization.')' : '').'</td>
-                                                        <td></td>
-                                                    </tr>
-                                                </table>
-                                                <table cellpadding="2" cellspacing="2" width="100%" style="margin-top: 9rem;">
-                                                    <tr>
-                                                        <td></td>
-                                                        <td width="100">';
-                                                            $dataQR = array(
-                                                                'cert_id'       => $latestID,
-                                                                'id_std'        => $id_std,
-                                                                'id_enroll'     => $id_enroll,
-                                                            );
-                                                            $dataJSON = get_dataHashingOnlyExp(json_encode($dataQR), true);
-                                                            echo '
-                                                            <div id="qrcode"></div>
-                                                            <script>
-                                                            const qrCode = new QRCodeStyling({
-                                                                width: 100,
-                                                                height: 100,
-                                                                type: "svg",
-                                                                data: \''.SITE_URL.'verify-certificate/'.$dataJSON.'\',
-                                                                qrOptions: {
-                                                                    errorCorrectionLevel: "H"
-                                                                }
-                                                            });
 
-                                                            qrCode.append(document.getElementById("qrcode"));
-                                                            </script>                                        
-                                                        </td>
-                                                        <td></td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-                                            <div style="clear:both;"></div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </body>
-                            
-                            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
-                            <script type="text/javascript">
-                                function printAndRedirect() {
-                                    document.querySelector("#hide_on_download").style.display = "none"; // Hide print button
-                                    
-                                    const element = document.body; // Get the entire body of the page
+                                <div id="certificate_wrapper">
+                                    <img class="cert-bg-img" src="'.SITE_URL.'assets/img/certificates/training-certificate.jpeg" crossorigin="anonymous" alt="Certificate Background" />
 
-                                    // Options for html2pdf.js
-                                    const opt = {
-                                        margin:       0,
-                                        filename:     "'.to_seo_url($cert_no.'-'.$cert_name.'-'.$std_name).'.pdf",
-                                        image:        { type: "jpeg", quality: 0.98 },
-                                        html2canvas:  { dpi: 192, letterRendering: true, backgroundColor: "#ffffff" },
-                                        jsPDF:        { unit: "mm", format: "a4", orientation: "landscape" }
-                                    };
-
-                                    // Convert the entire body of the page into a PDF and download it
-                                    html2pdf().from(element).set(opt).save();
-                                    // window.location.href = "'.SITE_URL.'student/trainings"; 
-                                }
-                            </script>
-                            </html>';
+                                    <div class="cert-container">
+                                        <div class="cert-no">'.$cert_no.'</div>
+                                        <div class="std-name">'.$std_name.'</div>
+                                        <div class="course-name">'.html_entity_decode(html_entity_decode($cert_name)).'</div>
+                                        <div class="employee-text">
+                                            '.implode(', <br>', array_map('trim', explode(',', $emply_name))).'
+                                        </div>
+                                        <div class="duration-text">'.$curs_hours.' '.($curs_hours>1 ? 'Hours' : 'Hour').'</div>
+                                        <div class="date-text">'.date('M d, Y', strtotime($dated)).'</div>
+                                        <div class="qr-box">
+                                            <div id="qrcode"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </body>';
                         }
+                        
+                        // JAVASCRIPT FOR QR AND PDF EXPORT (Common to both)
+                        echo'
+                        <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+                        <script type="text/javascript">
+                            const qrCode = new QRCodeStyling({
+                                width: 70,
+                                height: 70,
+                                type: "canvas", // Uses canvas instead of svg to work seamlessly with html2pdf.js
+                                data: \''.SITE_URL.'verify-certificate/'.$dataJSON.'\',
+                                qrOptions: {
+                                    errorCorrectionLevel: "H"
+                                },
+                                dotsOptions: {
+                                    color: "#000000",
+                                    type: "square" // Options: "rounded", "dots", "classy", "classy-rounded", "square", "extra-rounded"
+                                },
+                                backgroundOptions: {
+                                    color: "#ffffff"
+                                }
+                            });
+
+                            // Render the QR code inside the #qrcode container
+                            qrCode.append(document.getElementById("qrcode"));
+                        </script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+                        <script type="text/javascript">
+                            function printAndRedirect() {
+                                document.querySelector("#hide_on_download").style.display = "none";
+                                
+                                const element = document.getElementById("certificate_wrapper");
+
+                                const opt = {
+                                    margin:       0,
+                                    filename:     "'.to_seo_url($cert_no.'-'.$cert_name.'-'.$std_name).'.pdf",
+                                    image:        { type: "jpeg", quality: 0.98 },
+                                    html2canvas:  { 
+                                        dpi: 192, 
+                                        letterRendering: true, 
+                                        useCORS: true, 
+                                        allowTaint: true, 
+                                        scale: 2,
+                                        backgroundColor: "#ffffff" 
+                                    },
+                                    jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
+                                    pagebreak:    { mode: "avoid-all" } /* Forces html2pdf to avoid breaking into page 2 */
+                                };
+
+                                html2pdf().set(opt).from(element).save().then(() => {
+                                    document.querySelector("#hide_on_download").style.display = "block";
+                                });
+                            }
+                        </script>
+                    </html>';
+
                     } else {
                         echo'<center><h3 style="margin-top: 15rem; color: red;">100% Completion is necessary for Certificate.</h3></center>';
                     }

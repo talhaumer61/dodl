@@ -27,9 +27,9 @@ if ($response !== false) {
 
 
 define('LMS_HOSTNAME'			, 'localhost');
-define('LMS_NAME'				, 'mcdl_lms2026');
-define('LMS_USERNAME'			, 'mcdl_lmd');
-define('LMS_USERPASS'			, '3zXPAnT8qe1l1yfp');
+define('LMS_NAME'				, 'gptech_dodl');
+define('LMS_USERNAME'			, 'root');
+define('LMS_USERPASS'			, '');
 
 
 //define('LMS_HOSTNAME'			, 'localhost');
@@ -148,8 +148,8 @@ define('LMS_DO'			    , 		$do);
 define('LMS_EPOCH'		    , 		date("U"));
 define('LMS_VIEW'		    , 		$view);
 define('LMS_FLAG'		    , 		$flag);
-define("SITE_URL"			,       "https://dodl.mul.edu.pk/");
-define("SITE_URL_PORTAL"	,       "https://mcdl.mul.edu.pk/");
+define("SITE_URL"			,       "https://localhost/GPT/dodl.mul.edu.pk/");
+define("SITE_URL_PORTAL"	,       "https://localhost/GPT/mcdl.mul.edu.pk/");
 define('TITLE_HEADER'		, 		'DODL');
 define("SITE_NAME"			, 		"Directorate of Open and Distance Learning");
 define("SITE_PHONE"         , 		"+92 315 400 3459");
