@@ -16,14 +16,15 @@ $response = curl_exec($ch);
 $error = curl_error($ch);
 curl_close($ch);
 
-if ($response !== false) {
-  $userGeoInfo = unserialize($response);
-  if ($userGeoInfo && $userGeoInfo['status'] === 'success') {
-    define('__COUNTRY__', strtolower($userGeoInfo['countryCode']));
-  }
-} else {
-  define('__COUNTRY__'  , 'pk');
-}
+// if ($response !== false) {
+//   $userGeoInfo = unserialize($response);
+//   if ($userGeoInfo && $userGeoInfo['status'] === 'success') {
+//     define('__COUNTRY__', strtolower($userGeoInfo['countryCode']));
+//   }
+// } else {
+//   define('__COUNTRY__'  , 'pk');
+// }
+define('__COUNTRY__'  , 'pk');
 
 
 define('LMS_HOSTNAME'			, 'localhost');

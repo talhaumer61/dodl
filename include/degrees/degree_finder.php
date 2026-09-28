@@ -1,49 +1,115 @@
 <?php
 require_once 'include/wishlist/query.php';
-$condition = array ( 
-                       'select' 		  =>	'pc.cat_id, pc.cat_href, pc.cat_name, pc.cat_description'
-                      ,'join'         =>  'INNER JOIN '.PROGRAMS.' p ON p.id_cat = pc.cat_id
-                                           INNER JOIN '.ADMISSION_PROGRAMS.' ap ON ap.id_prg = p.prg_id
-                                           INNER JOIN '.ADMISSION_OFFERING.' a ON a.admoff_degree = ap.id AND a.admoff_type = 1'
-                      ,'where' 		    =>	array( 
-                                                   'pc.cat_status'   =>  1 
-                                                  ,'pc.is_deleted'   =>  0 
-                                              ) 
-                      ,'order_by'     =>  'pc.cat_id DESC'
-                      ,'return_type'	=>	'all'
-                    );
-$PROGRAMS_CATEGORIES = $dblms->getRows(PROGRAMS_CATEGORIES.' pc', $condition);
+require_once 'include/degrees/query.php';
 // SEARCH
-echo'
-<div class="page-banner">
+echo '
+<style>
+  /* Match Select2 container styling to standard form-control inputs */
+  .select2-container--default .select2-selection--single,
+  .select-form select.form-select,
+  .select-form select.form-control {
+    height: 42px !important;
+    border: 1px solid #dce0eb !important;
+    border-radius: 5px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    color: #495057 !important;
+    background-color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px !important;
+    padding-left: 0 !important;
+    color: #495057 !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 44px !important;
+    right: 10px !important;
+  }
+
+  .select2-container {
+    width: 100% !important;
+  }
+</style>
+<div class="page-content" style="background: none;">
   <div class="container">
     <div class="row">
-      <div class="col-md-12 col-12">
-        <h1 class="mb-0">Take your career to the next level with an online degree</h1>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="page-content" style="margin-top:-8rem; background: none;">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12 mx-auto">
-        <div class="support-wrap add-course-info">
-          <div class="checkout-form">
-            <form action="#">
-              <div class="row">
-                <div class="col-md-6 col-item">
-                  <input type="text" oninput="call_ajax()" data-search class="form-control" placeholder="Search Degree"/>
+      <div class="col-xl-12 col-lg-12 mb-2 col-md-12">  
+        <div class="row">
+          <div class="col-md-12">
+            <form action="" method="post" autocomplete="off">
+              <div class="settings-widget">
+                <div class="settings-inner-blk p-0">
+                  <div class="sell-course-head comman-space text-center">
+                    <h3>'.moduleName(CONTROLER).'</h3>
+                    <p>Stay tuned! Fill out our interest form to be the first to receive updates on this degree. Don\'t miss the chance to explore this exciting offering!</p>
+                  </div>
+                  <div class="comman-space pb-0">
+                    <input type="hidden" name="url" value="'.(isset($_POST['url']) ? $_POST['url'] : '').'">
+                    <input type="hidden" name="id" value="'.(isset($_POST['id']) ? $_POST['id'] : '').'">
+                    <input type="hidden" name="type" value="'.(isset($_POST['type']) ? $_POST['type'] : '').'">
+                    
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6 form-group">
+                          <label class="form-control-label">Name <span class="text-danger">*</span></label>
+                          <input type="text" class="form-control" name="name" value="'.$_SESSION['userlogininfo']['LOGINNAME'].'" required/>
+                        </div>
+                        <div class="col-md-6 col-lg-6 form-group">
+                          <label class="form-control-label">Email <span class="text-danger">*</span></label>
+                          <input type="email" class="form-control" name="email" value="'.$_SESSION['userlogininfo']['LOGINEMAIL'].'" required/>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6 form-group">
+                          <label class="form-control-label">Whatsapp Number <span class="text-danger">*</span></label>
+                          <input type="number" class="form-control" name="whatsapp" required/>
+                        </div>
+                        <div class="col form-group">
+                          <label class="form-control-label">City <span class="text-danger">*</span></label>
+                          <input type="text" class="form-control" name="city" required/>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col form-group">
+                          <label class="form-control-label">Faculty / Interest <span class="text-danger">*</span></label>
+                          <div class="select-form">
+                            <select class="form-control select degree-select" name="id_interest">
+                              <option value="">Choose Faculty</option>';
+                              foreach (get_degree_interests() as $key => $value) {
+                                echo '<option value="'.$key.'">'.$value.'</option>';
+                              }
+                              echo '
+                            </select>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                      <div class="col form-group">
+                        <label class="form-control-label">Reviews</label>
+                        <textarea class="form-control" name="remarks"></textarea>
+                      </div>
+                    </div>                    
+                    
+                    <div class="row">
+                        <div class="col form-group">
+                          <div class="g-recaptcha" data-sitekey="'.CAPTCHA_SITE_KEY.'"></div>
+                        </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-6 col-lg-6 col-item">
-                  <div class="form-group select-form mb-0">
-                    <select class="form-select select" data-search-cb="p.id_cat" onchange="call_ajax()" name="sellist1">
-                      <option value="">Choose Faculty</option>';
-                      foreach ($PROGRAMS_CATEGORIES as $cat) {
-                        echo '<option value="'.$cat['cat_id'].'" >'.$cat['cat_name'].'</option>';
-                      }
-                      echo'
-                    </select>
+              </div>
+              <div class="container-fluid">
+                <div class="update-profile row">
+                  <div class="col">
+                    <a href="'.SITE_URL.(isset($_POST['url']) ? $_POST['url'] : '').'" class="btn btn-wish w-100 mr-1"><i class="fa fa-chevron-left" aria-hidden="true"></i> Back</a>
+                  </div>                      
+                  <div class="col">
+                    <button name="interest_submit" type="submit" class="btn btn-enroll w-100">Submit</button>
                   </div>
                 </div>
               </div>
@@ -52,315 +118,18 @@ echo'
         </div>
       </div>
     </div>
-    <section class="mt-5">
-      <h4 align="center" class="p-5 mb-0 text-danger bg-white border rounded">Coming Soon...!</h4>
-      <div class="container" id="_change">';
-        // DATA WILL APPEAR HERE
-        echo'       
-      </div>
-    </section>
   </div>
 </div>';
 
-// JUMP TO DEGREE CATEGORY
-echo'
-<section class="course-content">
-  <div class="container">
-    <div class="notify-sec">
-      <div class="row">
-        <h5>Find the right online degree program for you</h5>';
-        foreach ($PROGRAMS_CATEGORIES as $cat) {
-          echo'
-          <div class="col-md-4">
-            <div class="notify-item shadow">
-              <div class="notify-detail">
-                <h6>
-                  <a href="'.SITE_URL.'degrees/'.$cat['cat_href'].'">'.$cat['cat_name'].'</a>
-                </h6>
-                <div class="line-clamp-2">'.html_entity_decode($cat['cat_description']).'</div>
-                <br>
-                <a href="'.SITE_URL.'degrees/'.$cat['cat_href'].'"><i class="fa fa-arrow-right"></i> View all programs</a>
-              </div>
-            </div>
-          </div>';
-        }
-        echo'
-      </div>
-    </div>
-  </div>
-</section>';
-
-// BROWSE BY CATEGORY
-/*echo'
-<div class="page-content">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="title-sec">
-          <h5>Explore more degrees by category</h5>
-        </div>
-        <div class="row">
-          <div class="col-lg-4 col-md-6">
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-01.jpg" alt />
-                </div>
-                <h5>Logo Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-02.jpg" alt />
-                </div>
-                <h5>Business Cards & Stationery</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-03.jpg" alt />
-                </div>
-                <h5>Brochure Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-04.jpg" alt />
-                </div>
-                <h5>Social Media Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-05.jpg" alt />
-                </div>
-                <h5>Graphics for Streamers</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-06.jpg" alt />
-                </div>
-                <h5>Photoshop Editing</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6">
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-07.jpg" alt />
-                </div>
-                <h5>Brand Style Guides</h5>
-              </div>
-              <span class="cat-count">25</span>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-08.jpg" alt />
-                </div>
-                <h5>Illustration</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-09.jpg" alt />
-                </div>
-                <h5>Flyer Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-10.jpg" alt />
-                </div>
-                <h5>Icon Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-11.jpg" alt />
-                </div>
-                <h5>Packaging & Label Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-12.jpg" alt />
-                </div>
-                <h5>Presentation Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6">
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-13.jpg" alt />
-                </div>
-                <h5>Game Art</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-14.jpg" alt />
-                </div>
-                <h5>Pattern Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-15.jpg" alt />
-                </div>
-                <h5>Book Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-16.jpg" alt />
-                </div>
-                <h5>Invitation Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-17.jpg" alt />
-                </div>
-                <h5>UX Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-            <div class="category-box">
-              <div class="category-title">
-                <div class="category-img">
-                  <img src="'.SITE_URL.'assets/img/category/category-06.jpg" alt />
-                </div>
-                <h5>Infographic Design</h5>
-              </div>
-              <div class="cat-count">
-                <span>25</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>';
-*/
 echo'
 <script>
   $(document).ready(function(){
-    call_ajax();
+  if ($(".select").length > 0) {
+        $(".select").select2({
+            minimumResultsForSearch: -1,
+            width: "100%"
+        });
+    }
   })
-
-  function call_ajax(page=1,limit = 10){
-    page_url  = "include/degrees/table.php";
-    searchval = [];
-
-    $("[data-search]").each(function() {
-      searchval.push($(this).val());
-    });
-
-    searchcb = {};
-    $("[data-search-cb]").each(function() {
-      let key = $(this).data("search-cb");
-      let value = $(this).val();
-      if ($(this).is("select")) {
-        if (!Array.isArray(value)) {
-          value = value === null ? [] : [value];
-        }
-        if (value.filter(Boolean).length > 0 ) {
-          if (!searchcb[key]) {
-            searchcb[key] = [];
-          }
-          searchcb[key] = searchcb[key].concat(value.filter(Boolean));
-        }
-      } else if ($(this).is(":checked") && value !== undefined && value !== "") {
-        if (!searchcb[key]) {
-          searchcb[key] = [];
-        }
-        searchcb[key].push(value);
-      }
-    });
-
-    // console.log(searchcb);
-    let formData = new FormData();
-    formData.append("word", JSON.stringify(searchval)); 
-    formData.append("page", page);
-    formData.append("limit", limit);
-    formData.append("check", JSON.stringify(searchcb));
-    $.ajax({
-      url: page_url, 
-      type : "POST",
-      contentType: false,
-      processData: false,
-      data : formData,
-      success: function(result){
-        $("#change").html(result);
-        $("html, body").animate({ scrollTop: 0 }, 300);
-      }
-    });
-  }
 </script>';
 ?>

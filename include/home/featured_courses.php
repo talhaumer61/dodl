@@ -14,24 +14,40 @@ $condition = array (
                     ); 
 $COURSES_CATEGORIES = $dblms->getRows(COURSES_CATEGORIES.' cc', $condition);
 
-$condition = array ( 
-                       'select'       =>	'c.curs_href, c.curs_type_status, c.curs_id, c.curs_wise, c.duration, c.curs_name, c.curs_rating, c.curs_hours, c.curs_icon, c.curs_photo, c.curs_code, c.curs_href, a.admoff_amount, a.admoff_type, a.admoff_amount_in_usd, att.id_teacher, e.emply_name 
-                                          ,COUNT(DISTINCT ec.secs_id) as TotalStd, COUNT(DISTINCT l.lesson_id) TotalLesson'
-                      ,'join'         =>  'INNER JOIN '.ADMISSION_OFFERING.' a ON a.admoff_degree = c.curs_id AND a.admoff_type=3
-                                            LEFT JOIN '.ENROLLED_COURSES.' ec ON FIND_IN_SET(c.curs_id, ec.id_curs)
-                                            LEFT JOIN '.COURSES_LESSONS.' l ON l.id_curs = c.curs_id AND l.is_deleted = 0 AND l.lesson_status = 1
-                                            LEFT JOIN '.ALLOCATE_TEACHERS.' att ON att.id_curs = c.curs_id
-                                            LEFT JOIN '.EMPLOYEES.' e ON e.emply_id = att.id_teacher'
-                      ,'where' 		    =>	array( 
-                                                 'c.curs_status' 	    => '1' 
-                                                ,'c.is_deleted' 	    => '0'
-                                              )
-                      ,'group_by'     =>  'c.curs_id'
-                      ,'limit'        =>  9
-                      ,'order_by'     =>  ' FIELD(c.curs_type_status, "2", "4", "3", "5", "1"), RAND()'
-                      ,'return_type'	=>	'all'
-                    );
-$COURSESALL = $dblms->getRows(COURSES.' c', $condition, $sql);
+// Common condition base
+$baseCondition = array(
+    'select'      => 'c.curs_href, c.curs_type_status, c.curs_id, c.curs_wise, c.duration, c.curs_name, c.curs_rating, c.curs_hours, c.curs_icon, c.curs_photo, c.curs_code, 
+                      a.admoff_amount, a.admoff_type, a.admoff_amount_in_usd, att.id_teacher, e.emply_name, 
+                      COUNT(DISTINCT ec.secs_id) as TotalStd, COUNT(DISTINCT l.lesson_id) TotalLesson',
+    'join'        => 'INNER JOIN ' . ADMISSION_OFFERING . ' a ON a.admoff_degree = c.curs_id AND a.admoff_type=3
+                      LEFT JOIN ' . ENROLLED_COURSES . ' ec ON FIND_IN_SET(c.curs_id, ec.id_curs)
+                      LEFT JOIN ' . COURSES_LESSONS . ' l ON l.id_curs = c.curs_id AND l.is_deleted = 0 AND l.lesson_status = 1
+                      LEFT JOIN ' . ALLOCATE_TEACHERS . ' att ON att.id_curs = c.curs_id
+                      LEFT JOIN ' . EMPLOYEES . ' e ON e.emply_id = att.id_teacher',
+    'where'       => array(
+                        'c.curs_status' => '1',
+                        'c.is_deleted'  => '0'
+                     ),
+    'group_by'    => 'c.curs_id',
+    'order_by'    => 'FIELD(c.curs_type_status, "2", "4", "3", "5", "1"), RAND()',
+    'return_type' => 'all'
+);
+
+// 1. Fetch 6 standard courses (Excluding Type 6)
+$conditionOthers = $baseCondition;
+$conditionOthers['search_by'] = ' AND c.curs_type_status != "6" ';
+$conditionOthers['limit'] = 6;
+$COURSES_OTHERS = $dblms->getRows(COURSES . ' c', $conditionOthers) ?: array();
+
+// 2. Fetch 3 Type-6 courses (For the bottom row of "All" tab)
+$conditionType6_3 = $baseCondition;
+$conditionType6_3['search_by'] = ' AND c.curs_type_status = "6" ';
+$conditionType6_3['limit'] = 3;
+$COURSES_TYPE6_3 = $dblms->getRows(COURSES . ' c', $conditionType6_3) ?: array();
+
+// 3. Combine both for "All" tab (First 6 = Others, Last 3 = Type 6)
+$COURSESALL = array_merge($COURSES_OTHERS, $COURSES_TYPE6_3);
+
 echo'
 <section class="featured-section-five">
   <div class="container">

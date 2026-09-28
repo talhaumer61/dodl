@@ -1785,3 +1785,17 @@ function seconds_to_time($TimeInSeconds = '') {
         return false;
     }
 }
+
+// Degree Interests
+function get_degree_interests($id = '') {
+	$degreesList = array (
+						 '1' => 'Islamic Banking and Finance'
+						,'2' => 'International Relation'
+						,'3' => 'Islamic Studies'
+					  );
+	if($id != ''){
+		return $degreesList[$id];
+	}else{
+		return $degreesList;
+	}
+}
